@@ -16,17 +16,29 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ItemRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    uriTemplate: '/items',
+    operations: [ new GetCollection(), new Post(security: "is_granted('ROLE_ADMIN')") ],
+)]
+#[ApiResource(
+    uriTemplate: '/items/{id}',
+    operations: [ new Get(), new Put(security: "is_granted('ROLE_ADMIN')"),
+        new Delete(security: "is_granted('ROLE_ADMIN')") ],
+    uriVariables: [
+        'id' => new Link(fromClass: Item::class),
+    ]
+)]
 #[ApiResource(
     uriTemplate: '/cargos/{cargosId}/items',
-    operations: [ new GetCollection(), new Post() ],
+    operations: [ new GetCollection(), new Post(security: "is_granted('ROLE_ADMIN')") ],
     uriVariables: [
         'cargosId' => new Link(fromClass: Cargo::class, toProperty: 'cargos'),
     ]
 )]
 #[ApiResource(
     uriTemplate: '/cargos/{cargosId}/items/{id}',
-    operations: [ new Get(), new Put(), new Delete() ],
+    operations: [ new Get(), new Put(security: "is_granted('ROLE_ADMIN')"),
+        new Delete(security: "is_granted('ROLE_ADMIN')") ],
     uriVariables: [
         'cargosId' => new Link(fromClass: Cargo::class, toProperty: 'cargos'),
         'id' => new Link(fromClass: Item::class),
@@ -34,7 +46,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: 'vehicles/{vehicleId}/cargos/{cargosId}/items',
-    operations: [ new GetCollection(), new Post() ],
+    operations: [ new GetCollection(), new Post(security: "is_granted('ROLE_ADMIN')") ],
     uriVariables: [
         'vehicleId' => new Link(fromClass: Vehicle::class, toProperty: 'vehicle'),
         'cargosId' => new Link(fromClass: Cargo::class, toProperty: 'cargos'),
@@ -42,7 +54,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: 'vehicles/{vehicleId}/cargos/{cargosId}/items/{id}',
-    operations: [ new Get(), new Put(), new Delete() ],
+    operations: [ new Get(), new Put(security: "is_granted('ROLE_ADMIN')"),
+        new Delete(security: "is_granted('ROLE_ADMIN')") ],
     uriVariables: [
         'vehicleId' => new Link(fromClass: Vehicle::class, toProperty: 'vehicle'),
         'cargosId' => new Link(fromClass: Cargo::class, toProperty: 'cargos'),

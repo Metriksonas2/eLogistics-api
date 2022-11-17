@@ -2,25 +2,51 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    uriTemplate: '/users',
+    operations: [ new GetCollection(
+        normalizationContext: ['groups' => ['users_get_collection']]
+    ), new Post() ],
+    security: "is_granted('ROLE_ADMIN')"
+)]
+#[ApiResource(
+    uriTemplate: '/users/{id}',
+    operations: [ new Get(
+        normalizationContext: ['groups' => ['users_get']]
+    ), new Put(), new Delete() ],
+    uriVariables: [
+        'id' => new Link(fromClass: User::class),
+    ],
+    security: "is_granted('ROLE_ADMIN')"
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['users_get', 'users_get_collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['users_get', 'users_get_collection'])]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['users_get', 'users_get_collection'])]
     private array $roles = [];
 
     /**
