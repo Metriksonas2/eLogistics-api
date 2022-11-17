@@ -16,7 +16,18 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CargoRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    uriTemplate: '/cargos',
+    operations: [ new GetCollection(), new Post() ],
+)]
+#[ApiResource(
+    uriTemplate: '/cargos/{id}',
+    operations: [ new Get(), new Put(security: "is_granted('ROLE_ADMIN') or object.owner == user"),
+        new Delete(security: "is_granted('ROLE_ADMIN') or object.owner == user") ],
+    uriVariables: [
+        'id' => new Link(fromClass: Cargo::class),
+    ]
+)]
 #[ApiResource(
     uriTemplate: '/vehicles/{vehicleId}/cargos',
     operations: [ new GetCollection(), new Post() ],
@@ -31,6 +42,23 @@ use Symfony\Component\Validator\Constraints as Assert;
         'vehicleId' => new Link(fromClass: Vehicle::class, toProperty: 'vehicle'),
         'id' => new Link(fromClass: Cargo::class),
     ]
+)]
+#[ApiResource(
+    uriTemplate: '/users/{userId}/cargos',
+    operations: [ new GetCollection(), new Post() ],
+    uriVariables: [
+        'userId' => new Link(fromClass: User::class, toProperty: 'owner'),
+    ],
+    security: "is_granted('ROLE_ADMIN') or userId == user.getId()"
+)]
+#[ApiResource(
+    uriTemplate: '/users/{userId}/cargos/{id}',
+    operations: [ new Get(), new Put(), new Delete() ],
+    uriVariables: [
+        'userId' => new Link(fromClass: User::class, toProperty: 'owner'),
+        'id' => new Link(fromClass: Cargo::class),
+    ],
+    security: "is_granted('ROLE_ADMIN') or userId == user.getId()"
 )]
 class Cargo
 {
@@ -62,6 +90,10 @@ class Cargo
     #[ORM\ManyToMany(targetEntity: Item::class, mappedBy: 'cargos')]
     #[Link(toProperty: 'cargos')]
     private Collection $items;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cargos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $owner = null;
 
     public function __construct()
     {
@@ -156,6 +188,18 @@ class Cargo
         if ($this->items->removeElement($item)) {
             $item->removeCargo($this);
         }
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
 
         return $this;
     }
