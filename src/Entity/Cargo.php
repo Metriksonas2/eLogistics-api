@@ -13,16 +13,21 @@ use App\Repository\CargoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CargoRepository::class)]
 #[ApiResource(
     uriTemplate: '/cargos',
-    operations: [ new GetCollection(), new Post() ],
+    operations: [ new GetCollection(
+        normalizationContext: ['groups' => ['cargos_get_collection']]
+    ), new Post() ],
 )]
 #[ApiResource(
     uriTemplate: '/cargos/{id}',
-    operations: [ new Get(), new Put(security: "is_granted('ROLE_ADMIN') or object.owner == user"),
+    operations: [ new Get(
+        normalizationContext: ['groups' => ['cargos_get']]
+    ), new Put(security: "is_granted('ROLE_ADMIN') or object.owner == user"),
         new Delete(security: "is_granted('ROLE_ADMIN') or object.owner == user") ],
     uriVariables: [
         'id' => new Link(fromClass: Cargo::class),
@@ -45,7 +50,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: '/users/{userId}/cargos',
-    operations: [ new GetCollection(), new Post() ],
+    operations: [ new GetCollection(
+        normalizationContext: ['groups' => ['users_cargos_get_collection']]
+    ), new Post() ],
     uriVariables: [
         'userId' => new Link(fromClass: User::class, toProperty: 'owner'),
     ],
@@ -53,7 +60,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: '/users/{userId}/cargos/{id}',
-    operations: [ new Get(), new Put(), new Delete() ],
+    operations: [ new Get(
+        normalizationContext: ['groups' => ['users_cargos_get']]
+    ), new Put(), new Delete() ],
     uriVariables: [
         'userId' => new Link(fromClass: User::class, toProperty: 'owner'),
         'id' => new Link(fromClass: Cargo::class),
@@ -65,34 +74,49 @@ class Cargo
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?string $identifier = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?string $color = null;
 
     #[ORM\Column]
     #[Assert\NotNull]
     #[Assert\GreaterThanOrEqual(0)]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?float $totalWeight = null;
 
     #[ORM\ManyToOne(targetEntity: Vehicle::class, inversedBy: 'cargos')]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private ?Vehicle $vehicle = null;
 
     #[ORM\ManyToMany(targetEntity: Item::class, mappedBy: 'cargos')]
     #[Link(toProperty: 'cargos')]
+    #[Groups(['cargos_get', 'cargos_get_collection',
+        'users_cargos_get', 'users_cargos_get_collection'])]
     private Collection $items;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cargos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['users_cargos_get', 'users_cargos_get_collection'])]
     private ?User $owner = null;
 
     public function __construct()
