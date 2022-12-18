@@ -4,13 +4,18 @@
 
 Technologies used for the project:
 
+* Front end - **React** (``/eLogistics-client`` repository)
 * Back end - **PHP** (Symfony)
 
 ---
 
+## Project goal
+
+To create a system called "eLogistics", where clients would be able to sign up, create cargos from listed items, buy listed orders from orders list.
+
 ## What is this application?
 
-This is a simple CRUD type logistics app for creating or accepting orders. You can also create your own cargos from listed items, that will be included in your created orders.
+This is a simple CRUD type logistics app for creating or accepting cargos. You can also create your own cargos from listed items, that will be included in your created orders.
 
 ## How to prepare application?
 
@@ -115,6 +120,26 @@ Currently, there are 4 main entities:
   GET: '/api/users/{id}'
   PUT: '/api/users/{id}'
   DELETE: '/api/users/{id}'
+```
+
+### Subresources:
+
+#### Collection operations:
+
+```shell
+  GET: '/api/vehicles/{vehicleId}/cargos'
+  GET: '/api/users/{userId}/cargos'
+  GET: '/api/cargos/{cargoId}/items'
+  GET: '/api/vehicles/{vehicleId}/cargos/{cargoId}/items'
+```
+
+#### Item operations:
+
+```shell
+  GET: '/api/vehicles/{vehicleId}/cargos/{cargoId}'
+  GET: '/api/users/{userId}/cargos/{cargoId}'
+  GET: '/api/cargos/{cargoId}/items/{itemId}'
+  GET: '/api/vehicles/{vehicleId}/cargos/{cargoId}/items/{itemId}'
 ```
 
 ## Access control
