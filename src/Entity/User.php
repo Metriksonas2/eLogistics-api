@@ -21,9 +21,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     uriTemplate: '/users',
     operations: [ new GetCollection(
-        normalizationContext: ['groups' => ['users_get_collection']]
-    ), new Post() ],
-    security: "is_granted('ROLE_ADMIN')"
+        normalizationContext: ['groups' => ['users_get_collection']],
+        security: "is_granted('ROLE_ADMIN')",
+    ), new Post(security: "is_granted('PUBLIC_ACCESS')") ]
 )]
 #[ApiResource(
     uriTemplate: '/users/{id}',

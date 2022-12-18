@@ -27,8 +27,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     uriTemplate: '/cargos/{id}',
     operations: [ new Get(
         normalizationContext: ['groups' => ['cargos_get']]
-    ), new Put(security: "is_granted('ROLE_ADMIN') or object.owner == user"),
-        new Delete(security: "is_granted('ROLE_ADMIN') or object.owner == user") ],
+    ), new Put(
+        security: "is_granted('ROLE_ADMIN') or object.getOwner() == user"
+    ),
+        new Delete(security: "is_granted('ROLE_ADMIN') or object.getOwner() == user") ],
     uriVariables: [
         'id' => new Link(fromClass: Cargo::class),
     ]
